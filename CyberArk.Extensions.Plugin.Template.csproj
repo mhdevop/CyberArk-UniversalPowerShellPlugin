@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{8D74F9E7-2288-43BA-8F77-60A67DD9A41E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CyberArk.Extensions.Plugin.RealPowerShell</RootNamespace>
+    <AssemblyName>CyberArk.Extensions.Plugin.RealPowerShell</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>%24/CADev/Extensions/Main/CPM Plug-in/CyberArk.Extensions.Plugin.Template/CyberArk.Extensions.Plugin.Template</SccProjectName>
+    <SccLocalPath>.</SccLocalPath>
+    <SccAuxPath>http://ca-dev-tfsapp15:8080/tfs/defaultcollection</SccAuxPath>
+    <SccProvider>{4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}</SccProvider>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="CyberArk.Extensions.Infra.Common">
+      <HintPath>CPMbin\CyberArk.Extensions.Infra.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="CyberArk.Extensions.Plugins.Models">
+      <HintPath>CPMbin\CyberArk.Extensions.Plugins.Models.dll</HintPath>
+    </Reference>
+    <Reference Include="CyberArk.Extensions.Utilties">
+      <HintPath>CPMbin\CyberArk.Extensions.Utilties.dll</HintPath>
+    </Reference>
+    <Reference Include="CyberArk.Services.Exceptions">
+      <HintPath>CPMbin\CyberArk.Services.Exceptions.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>CPMbin\System.Management.Automation.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BaseAction.cs" />
+    <Compile Include="Change.cs" />
+    <Compile Include="Logon.cs" />
+    <Compile Include="PluginErrors.cs" />
+    <Compile Include="Prereconcile.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reconcile.cs" />
+    <Compile Include="Verify.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Parmeters File\user.ini" />
+    <None Include="Platform Files\Policy-Template.ini" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="CPMbin\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Platform Files\Policy-Template.xml" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy /Q /Y "$(TargetDir)$(TargetName).*" "$(SolutionDir)\..\bin\Extensions\$(ProjectName)\$(ConfigurationName)\"
+xcopy /Q /Y "$(TargetDir)*.dll" "$(SolutionDir)\..\bin\Extensions\$(ProjectName)\$(ConfigurationName)\"
+xcopy /Q /Y "$(TargetDir)*.pdb" "$(SolutionDir)\..\bin\Extensions\$(ProjectName)\$(ConfigurationName)\"
+copy "$(TargetDir)CyberArk.Extensions.Plugin.RealPowerShell.dll" "$(SolutionDir)\CPMbin"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
