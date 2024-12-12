@@ -90,14 +90,14 @@
     <Compile Include="Verify.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Parmeters File\user.ini" />
-    <None Include="Platform Files\Policy-Template.ini" />
+    <None Include="user.ini" />
+    <None Include="Policy-Template.ini" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CPMbin\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Platform Files\Policy-Template.xml" />
+    <Content Include="Policy-Template.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

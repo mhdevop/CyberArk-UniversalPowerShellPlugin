@@ -306,22 +306,21 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
                 }
                 else
                 {
-                    log.WriteLine("change", "PowerShellOutput", "PowerShell Output below --------------------------\n", LogLevel.INFO);
-
+                    string noErrorOutPut = "";
                     foreach (PSObject rtnItem in PSresultsObject)
                     {
 
-                        log.WriteLine("change", "PowerShellOutput", "Raw PowerShell Output:\n\n" + rtnItem.ToString() + "\n\n-----------------End of Output", LogLevel.INFO);
-
+                        noErrorOutPut += rtnItem.ToString() + "\n";
                         if (rtnItem.ToString().Contains("PowerShell Success"))
                         {
                             log.WriteLine("change", "PowerShellOutputSuccess", "We do indeed see 'PowerShell Success' in the PowerShell output so assume success!!!", LogLevel.INFO);
                             RC = 0;
                         }
 
-
-
                     }
+
+                    log.WriteLine("change", "PowerShellOutput", "\n-------------- Raw PowerShell Output Below --------------------------------------------------------------------\n\n" + noErrorOutPut + "\n\n--------------------------------------------------- End of Raw PowerShell Output Aboove  -------------------------------------------------------------", LogLevel.INFO);
+
 
                 }
 

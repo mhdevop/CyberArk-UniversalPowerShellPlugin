@@ -10,9 +10,7 @@
     On the CPM, run the following command one directory up from the "bin" folder to test the plugin (reference: https://docs.cyberark.com/pam-self-hosted/latest/en/content/pasimp/plug-in-netinvoker_test.htm?tocpath=Developer%7CCreate%20extensions%7CCreate%20CPM%20plugins%7CCredentials%20Management%20.NET%20SDK%7C_____5)
     CANetPluginInvoker.exe user.ini changepass CyberArk.Extensions.Plugin.RealPowerShell.dll true
 .NOTES
-    Author: https://github.com/mhdevop/CyberArk-RealPowerShell
-    Date:   2024-12-06
-    Version: 1.0
+    Author: https://github.com/mhdevop/CyberArk-UniversalPowerShellPlugin
 #>
 
 #intro
