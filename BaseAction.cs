@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Management.Automation.Runspaces;
 using System.Management.Automation;
 using System.Text;
+using System.IO;
 
 // Change the Template name space
 namespace CyberArk.Extensions.Plugin.RealPowerShell
@@ -32,28 +33,22 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
             int RC = 9999;
             #region Init
 
-           string USERNAME = "username";
-           string PORT = "port";
-           string debug = "debug";
+            string debug = "debug";
+            string PowerShellScriptName = "PowerShellScriptName";
 
-
-
-        Boolean isUsage = false;
-            Boolean hasTarget = false;
-            Boolean hasLogon = false;
-            Boolean hasReconcile = false;
-            Boolean isDebugEnabledInPlatform = false;
+            Boolean isUsage = false;
 
             // create pointer variables we will fill in later to ensure the scope of them reaches all areas of code
-            PSCredential MasterPSCredObject; //= new PSCredential("MasterPSCredObject", StringExtension.convertToSecureString("PLACEHOLDER"));
+            PSCredential MasterPSCredObject; 
             PSCredential TargetPSCredObjectCurrent;
             PSCredential TargetPSCredObjectNew;
             PSCredential LogonPSCredObject;
             PSCredential ReconPSCredObject;
 
-            Hashtable CARKMasterHashtable = new Hashtable(); ;
-            Hashtable CARKTargetHashtable = new Hashtable(); ;
-            Hashtable CARKLogonHashtable = new Hashtable(); ;
+            Hashtable CARKMasterHashtable = new Hashtable(); 
+            Hashtable CARKTargetHashtable = new Hashtable();
+            Hashtable CARKTargetExtraHashtable = new Hashtable();
+            Hashtable CARKLogonHashtable = new Hashtable(); 
             Hashtable CARKReconHashtable = new Hashtable();
 
 
@@ -72,8 +67,9 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
             // attach the PowerShell object to the runspace we created
             powershellObject.Runspace = runspaceObject;
 
+            string ScriptName = ParametersAPI.GetOptionalParameter(PowerShellScriptName, TargetAccount.AccountProp, TargetAccount.ExtraInfoProp);
 
-            System.IO.StreamReader StreamReaderObject = new System.IO.StreamReader("tester.ps1");
+            
 
             try
             {
@@ -81,7 +77,7 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
 
                 if (debugText.Equals("yes", StringComparison.OrdinalIgnoreCase))
                 {
-                    isDebugEnabledInPlatform = true;
+             
                     CARKTargetHashtable.Add("debug", true);
                 }
 
@@ -96,14 +92,26 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
 
             try
             {
-                log.WriteLine(CPMAction, "customCode", "Attempting to read the PowerShell script", LogLevel.INFO);
-
-
+                log.WriteLine(CPMAction, "customCode", "Attempting to read the PowerShell script = " + Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ScriptName), LogLevel.INFO);
+                
+                 System.IO.StreamReader StreamReaderObject = new System.IO.StreamReader(ScriptName);
+                powershellObject.AddScript("Set-ExecutionPolicy Bypass -Scope Process -Force");
                 powershellObject.AddScript(StreamReaderObject.ReadToEnd());
+           
+                StreamReaderObject.Close();
+                StreamReaderObject.Dispose();
+
             }
-            catch
+            catch (Exception ex)
             {
-                log.WriteLine(CPMAction, "customCode", "Unable to read script file", LogLevel.ERROR);
+                log.WriteLine(CPMAction, "customCode", "Catch on powershell script read " + Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ScriptName), LogLevel.ERROR);
+
+                RC = HandleGeneralError(ex, ref platformOutput);
+                powershellObject.Dispose();
+                runspaceObject.Close();
+                runspaceObject.Dispose();
+                Logger.MethodEnd();
+                return RC;
             }
 
 
@@ -162,6 +170,26 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
 
                     }
 
+
+                    string KeyPairString2 = "";
+                    foreach (KeyValuePair<string, string> keyValuePair in TargetAccount.ExtraInfoProp)
+                    {
+                        // Console.WriteLine("Key: {0}, Value: {1}", keyValuePair.Key, keyValuePair.Value);
+                        if (!keyValuePair.Key.Contains("password"))
+                        {
+                            KeyPairString2 += "\n" + keyValuePair.Key + " = " + keyValuePair.Value;
+                            CARKTargetExtraHashtable.Add(keyValuePair.Key, keyValuePair.Value);
+                        }
+                        else
+                        {
+                            KeyPairString += "\n" + keyValuePair.Key + " = ******* (ssshhhh it's a secret after all)";
+                        }
+
+                    }
+
+
+
+
                     TargetPSCredObjectCurrent = new PSCredential("TargetPSCredObject", TargetAccount.CurrentPassword);
                     TargetPSCredObjectNew = new PSCredential("TargetPSCredObjectNew", TargetAccount.NewPassword);
 
@@ -169,8 +197,8 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
                     powershellObject.Runspace.SessionStateProxy.SetVariable("CARKTargetPSCredObjectNew", TargetPSCredObjectNew);
 
                     powershellObject.Runspace.SessionStateProxy.SetVariable("CARKTargetHashtable", CARKTargetHashtable);
+                    powershellObject.Runspace.SessionStateProxy.SetVariable("CARKTargetExtraHashtable", CARKTargetExtraHashtable);
 
-                    hasTarget = true;
 
                     log.WriteLine(CPMAction, "customCode", "Here are the properties on Target Account:\n" + KeyPairString + "\n", LogLevel.INFO);
 
@@ -204,7 +232,7 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
                     powershellObject.Runspace.SessionStateProxy.SetVariable("CARKReconPSCredObject", ReconPSCredObject);
                     powershellObject.Runspace.SessionStateProxy.SetVariable("CARKReconHashtable", CARKReconHashtable);
 
-                    hasReconcile = true;
+           
 
                     log.WriteLine(CPMAction, "customCode", "Here are the properties on Reconcile Account:\n" + KeyPairString + "\n", LogLevel.INFO);
                 }
@@ -237,7 +265,6 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
                     powershellObject.Runspace.SessionStateProxy.SetVariable("CARKReconHashtable", CARKReconHashtable);
                     powershellObject.Runspace.SessionStateProxy.SetVariable("CARKLogonHashtable", CARKLogonHashtable);
 
-                    hasLogon = true;
 
                     log.WriteLine(CPMAction, "customCode", "Here are the properties on Logon Account:\n" + KeyPairString + "\n", LogLevel.INFO);
                 }
@@ -317,8 +344,7 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
             finally
             {
                 // no matter what, always clean up the objects we used to ensure the OS get its resources back
-                StreamReaderObject.Close();
-                StreamReaderObject.Dispose();
+                
                 powershellObject.Dispose();
                 runspaceObject.Close();
                 runspaceObject.Dispose();

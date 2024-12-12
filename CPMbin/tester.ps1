@@ -7,8 +7,8 @@
     you've noticed in your Windows Event viewer but PowerShell logs arguments passed so it's crazy to feed in a password as it shows up in plaintext. Here,
     my plugin transparently attaches all the normal CyberArk variables you could need. In other words, work 99% in PowerShell, not in C# or Prompt/Process files.
 .EXAMPLE
-    On the CPM, run the following command one directory up from the "bin" folder to test the plugin (reference: https://docs.cyberark.com/pam-self-hosted/latest/en/content/pasimp/plug-in-netinvoker_test.htm?tocpath=Developer%7CCreate%20extensions%7CCreate%20CPM%20plugins%7CCredentials%20Management%20.NET%20SDK%7C_____5)
-    CANetPluginInvoker.exe user.ini changepass CyberArk.Extensions.Plugin.RealPowerShell.dll true
+    To "test" this plugin enter the "CPMBin" folder and run the following line in COMMAND (not PowerShell): (reference: https://docs.cyberark.com/pam-self-hosted/latest/en/content/pasimp/plug-in-netinvoker_test.htm?tocpath=Developer%7CCreate%20extensions%7CCreate%20CPM%20plugins%7CCredentials%20Management%20.NET%20SDK%7C_____5)
+    CANetPluginInvoker.exe ..\user.ini changepass CyberArk.Extensions.Plugin.RealPowerShell.dll true
 .NOTES
     Author: https://github.com/mhdevop/CyberArk-UniversalPowerShellPlugin
 #>
@@ -22,19 +22,27 @@ $global:RealPowerShellPassOrFail = "false" # in YOUR logic you need to set to = 
 
 # the CyberArk "properties" (safe, username, etc.) are all stored in a single PowerShell Hashtable for a consolidated experience.
 # in this example, we get the value of "debug" and if it's true we print all the variables that RealPowerShell has passed to this script
-if ($CARKTargetHashtable["debug"]){Write-Output (Get-Variable * | where {$_.name -like "CARK*"} | Out-String )}
+if ($CARKTargetExtraHashtable["debug"]){
+    Write-Output (Get-Variable * | where {$_.name -like "CARK*"} | Out-String )
+    $object = [PSCustomObject]$CARKTargetHashtable
+    $object | Export-Csv -Path "CARKTargetHashtable.csv" -NoTypeInformation -Force
+    $object = [PSCustomObject]$CARKTargetExtraHashtable
+    $object | Export-Csv -Path "CARKTargetExtraHashtable.csv" -NoTypeInformation -Force
+}
 
 <#  SAMPLE values that are available during runtime. "hashtable" contain account properties and "cred" objects contain the actual passwords
 
 Name                           Value                                                                                    
-----                           -----                                                                                    
+----                           ----- 
 CARKLogonHashtable             {username, PolicyID, foldername, objectname...}                                          
 CARKLogonPSCredObject          System.Management.Automation.PSCredential                                                
 CARKReconHashtable             {username, PolicyID, foldername, objectname...}                                          
 CARKReconPSCredObject          System.Management.Automation.PSCredential                                                
+CARKTargetExtraHashtable       {PlatformParameter, port, debug}                                                         
 CARKTargetHashtable            {objectname, username, debug, foldername...}                                             
 CARKTargetPSCredObjectCurrent  System.Management.Automation.PSCredential                                                
-CARKTargetPSCredObjectNew      System.Management.Automation.PSCredential   
+CARKTargetPSCredObjectNew      System.Management.Automation.PSCredential  
+
 #>
 
 # EXAMPLE 1 - the "username" is the value we want to get out of each hashtable based on type of account: target/logon/reconcile
@@ -122,7 +130,7 @@ function Invoke-ReconcilePass{
 # so that all logic is handled in this script. In other words, this is the part CyberArk won't be thrilled at in that we're abstracting out their SDK and boiling it down
 # which causes an intential "mismatch" between the phase the logic actually occurs in. If this is confusing then just remember this plugin comes with no support.
 Write-Output "CPM Operation Attempt = $CAOperation"
-if ($CAOperation -eq "changepass")
+if ($CAOperation -eq "change")
 {
 
     Write-Output "Starting CUSTOM verify function you coded"
