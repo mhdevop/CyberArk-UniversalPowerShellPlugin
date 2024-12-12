@@ -5,7 +5,7 @@ using CyberArk.Extensions.Utilties.Reader;
 using System;
 
 // Change the Template name space
-namespace CyberArk.Extensions.Plugin.Template
+namespace CyberArk.Extensions.Plugin.RealPowerShell
 {
     public class Logon : BaseAction
     {
@@ -56,40 +56,14 @@ namespace CyberArk.Extensions.Plugin.Template
             try
             {
 
-                #region Fetch Account Properties (FileCategories)
 
-                // Example: Fetch mandatory parameter - Username.
-                // A mandatory parameter is a parameter that must be defined in the account.
-                // TargetAccount.AccountProp is a dictionary that provides access to all the file categories of the target account.
-                // An exception will be thrown if the parameter does not exist in the account.
-                string username = ParametersAPI.GetMandatoryParameter(USERNAME, TargetAccount.AccountProp);
-
-                // Example: Fetch optional parmetere - Port.
-                // An optional parameter is a parameter that can be defined in the account or in the platform.
-                // TargetAccount.ExtraInfoProp is a dictionary that provieds access to all the platform parameters of the target account.
-                // An exception will be thrown if the parameter does not exist in neither the account or the platform.
-                string strPort = ParametersAPI.GetOptionalParameter(PORT, TargetAccount.AccountProp, TargetAccount.ExtraInfoProp);
-
-                // Note: To fetch Logon, Reconcile, Master or Usage account properties,
-                // replace the TargetAccount object with the relevant account's object.
-
-                #endregion
-
-                #region Fetch Account's Passwords
-
-                // Example : Fetch the target account's password.
-                string targetAccountPassword = TargetAccount.CurrentPassword.convertSecureStringToString();
-
-                // Example : Fetch the target account's new password.
-                string targetAccountNewPassword = TargetAccount.NewPassword.convertSecureStringToString();
-
-                #endregion
 
                 #region Logic
                 /////////////// Put your code here ////////////////////////////
                 // Logic goes here!!
                 // Logic goes here!!
                 // Logic goes here!!
+                RC = 0;
                 // Logic goes here!!
                 // Logic goes here!!
                 /////////////// Put your code here ////////////////////////////

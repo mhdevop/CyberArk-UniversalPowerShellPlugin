@@ -6,7 +6,7 @@ using CyberArk.Extensions.Utilties.CPMParametersValidation;
 using System;
 
 // Change the Template name space
-namespace CyberArk.Extensions.Plugin.Template
+namespace CyberArk.Extensions.Plugin.RealPowerShell
 {
     /*
      * Base Action class should contain common plug-in functionality and parameters.

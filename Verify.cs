@@ -5,7 +5,7 @@ using CyberArk.Extensions.Utilties.Reader;
 using System;
 
 // Change the Template name space
-namespace CyberArk.Extensions.Plugin.Template
+namespace CyberArk.Extensions.Plugin.RealPowerShell
 {
     public class Verify : BaseAction
     {

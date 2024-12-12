@@ -15,7 +15,7 @@ using System.Collections;
 
 
 // Change the Template name space
-namespace CyberArk.Extensions.Plugin.Template
+namespace CyberArk.Extensions.Plugin.RealPowerShell
 {
     public class Change : BaseAction
     {
