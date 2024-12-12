@@ -9,12 +9,7 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
 {
     public class Logon : BaseAction
     {
-        #region Consts
-
-        public static readonly string USERNAME = "username";
-        public static readonly string PORT = "port";
-
-        #endregion
+        
 
         #region constructor
         /// <summary>
