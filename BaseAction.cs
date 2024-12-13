@@ -139,7 +139,6 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
 
                 log.WriteLine(CPMAction, "customCode", "Confirmed plugin type = Usage", LogLevel.INFO);
 
-
             }
             catch
             {
