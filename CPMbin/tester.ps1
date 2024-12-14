@@ -138,7 +138,7 @@ if ($CAOperation -eq "change")
     if (Invoke-Verify)
     {
 
-        Write-Output "Starting CUSTOM changepass function you coded since we passed the verify (logon) portion so we know the password works to change"
+        Write-Output "Starting CUSTOM verify function you coded since we passed the verify (logon) portion so we know the password works to change"
         # now do the password change
         if (Invoke-ChangePass)
         {
