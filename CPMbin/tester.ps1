@@ -22,6 +22,8 @@ $global:RealPowerShellPassOrFail = "false" # in YOUR logic you need to set to = 
 
 # the CyberArk "properties" (safe, username, etc.) are all stored in a single PowerShell Hashtable for a consolidated experience.
 # in this example, we get the value of "debug" and if it's true we print all the variables that RealPowerShell has passed to this script
+# I HIGHLY recommend you DELETE this section of code entirely before you put it into your environment as some variables could be considered
+# more sensitive than others.
 if ($CARKTargetExtraHashtable["debug"]){
     Write-Output (Get-Variable * | where {$_.name -like "CARK*"} | Out-String )
     $object = [PSCustomObject]$CARKTargetHashtable
@@ -30,7 +32,8 @@ if ($CARKTargetExtraHashtable["debug"]){
     $object | Export-Csv -Path "CARKTargetExtraHashtable.csv" -NoTypeInformation -Force
 }
 
-<#  SAMPLE values that are available during runtime. "hashtable" contain account properties and "cred" objects contain the actual passwords
+<#  SAMPLE variables that are available during runtime which are the output of the above block of DEBUG code
+"hashtable" contain account properties and "cred" objects contain the actual passwords
 
 Name                           Value                                                                                    
 ----                           ----- 
@@ -182,5 +185,5 @@ elseif ($CAOperation -eq "reconcile")
 }
 
 # for the grand finale, write the pass/fail results of the entire plugin so that CPM can read it. As a reminder, anything but the magic phrase "PowerShell Success"
-# means that the plugin failed
+# means that the plugin failed. YOUR PowerShell script code needs to handle ALL the logic, failures, etc and only repor ton the ultimate success/failure of it.
 write-output $global:RealPowerShellPassOrFail
