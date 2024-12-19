@@ -30,7 +30,7 @@ These days you can't be too careful so "for the record" note the following:
 
 
 ## How do I install/use it?
-Download the plugin zip file from this GitHub Release page similar to how you would from the CyberArk Marketplace and
+Download the plugin zip file from this [GitHub Release page](https://github.com/mhdevop/CyberArk-UniversalPowerShellPlugin/releases) similar to how you would from the CyberArk Marketplace and
 [follow the latest instructions from CyberArk on importing plugins](https://docs.cyberark.com/pam-self-hosted/latest/en/content/platforms/platform-packages-import-introduction.htm?Highlight=import%20plugin#Importaplatformpackage).
 
 
@@ -59,7 +59,7 @@ I can't "build you a plugin" and I'm not "in a chat room" somewhere to offer hel
 
 -**Q: I <i>think</i> I get how cool this really is now, so how do I use it?**
 - A: You have two options: 
-    A) <i>recommended</i> - check out the release section of this GitHub repo and download the ZIP file to import the platform
+    A) <i>recommended</i> - check out the [release section](https://github.com/mhdevop/CyberArk-UniversalPowerShellPlugin/releases) of this GitHub repo and download the ZIP file to import the platform
     B) <i>not recommended unless you really know what you're doing</i> - download just the DLL plugin itself from the release portion, manually copy to your CPM bin folder, and edit existing platforms of yours to point to it. You'll also need to add the missing parameters in to it
 
 
@@ -67,7 +67,7 @@ I can't "build you a plugin" and I'm not "in a chat room" somewhere to offer hel
 - A: Can't say I blame you. I also say that, like CyberArk, I put no "questionable code" in my code. There is no "call home" no "metric collection" no "statistic" 
 no "Google Analytics" type things in my code. I couldn't tell, even if I wanted, what company was using my plugin and believe me, that's a legal problem I don't want to have.
 It's also worth mentioning that I like GitHub and don't want to breach their code of conduct. See the compiling section for info on that, though, I can tell you it's 
-obviously way faster to just grab the release and use that.
+obviously way faster to just grab the [release](https://github.com/mhdevop/CyberArk-UniversalPowerShellPlugin/releases) and use that.
 
 -**Q: If I want to compile this C# project myself but don't I need [Visual Studio Professional](https://visualstudio.microsoft.com/vs/professional/) which costs tons of money?**
 - A: While it's a far better experience to edit code and "see" things from a human perspetive, **no**, it's not "required" to simply compile this code. I spent a LOT of time
@@ -75,7 +75,7 @@ researching how to skip needing such an expensive software package. It can be do
 
 
 ## How To Build (Compile) this Plugin DLL
-<i>Caution: compiling code can be a complicated process. If you go this route, please be prepared to troubleshoot or if you give up, you can always just grab the latest DLL of the release page and skip compiling altogether</i>
+<i>Caution: compiling code can be a complicated process. If you go this route, please be prepared to troubleshoot or if you give up, you can always just grab the latest DLL of the [release page](https://github.com/mhdevop/CyberArk-UniversalPowerShellPlugin/releases) and skip compiling altogether</i>
 
 These are the steps that I've personally tested and got working though the steps may differ for your environment so you will need to adjust them accordingly. If you happen to have [Visual Studio Professional](https://visualstudio.microsoft.com/vs/professional/) already then you can simply right-click on the "Solution CyberArk.Extensions.Plugin.RealPowerShell" and "Build Solution" for the same results.
 
@@ -99,7 +99,7 @@ then command (assuming you've already installed [.NET 4.8 developer pack](https:
 ![Build Success](docs/BuildSuccess.PNG)
 12. Navigate within the project folder to see the finished plugin to get "CyberArk.Extensions.Plugin.RealPowerShell.dll"  (......\CA-RealPowerShell\bin\x86\Release):
 ![CPMbin contents](docs/FinalResultPlugin.PNG)
-13. Now that you have the DLL you can replace the existing DLL from the release section of this repo with your own (or copy directly to the CPM if you've already imported it)
+13. Now that you have the DLL you can replace the existing DLL from the [release](https://github.com/mhdevop/CyberArk-UniversalPowerShellPlugin/releases) section of this repo with your own (or copy directly to the CPM if you've already imported it)
 
 
 ## How To Sample or Test this plugin without actually putting it into our environment?
