@@ -24,7 +24,7 @@ These days you can't be too careful so "for the record" note the following:
   - My code does not follow some best practices to which I admit directly and openly. My objective was not to win first prize on "C# Best Practices 101".
   - My primary object was to make code that "works" and is "easier to understand" rather than "efficiency" or "minimal resources". (eg there is plenty of redundancy and room for fancy things like abstract classes, sharing methods, etc. but I chose not to use those to try and keep the code linear and easier to understand for the masses)
   - If you don't like it, think it's trash, hate it, or etc. by all means I encourage YOU to change it on your end. I can't and never will think of everything under the sun
-  - If you submit a GitHub issue/pull/etc. I might look at it but depending what it is but may elect to take no action. This is no reflection on your or the efficacy of your suggestion
+  - If you submit a GitHub issue/pull/etc., I might look at it, but depending what it is but may elect to take no action. This is no reflection on your or the efficacy of your suggestion
   but rather a refletion the level of time/effort on my part I may not want to take
 
 
@@ -40,34 +40,36 @@ I can't "build you a plugin" and I'm not "in a chat room" somewhere to offer hel
 [Like what you see? Buy me a coffee as a thank you](buymeacoffee.com/mhdevop)
 
 ## FAQ
--Q: A certain vendor already has a plugin (name removed) that handles using PowerShell through a plugin although you have to ask for it (not in the Marketplace). Why can't we just use that and why would we want your plugin instead?
+-**Q: A certain vendor already has a plugin (name removed) that handles using PowerShell through a plugin although you have to ask for it (not in the Marketplace). Why can't we just use that and why would we want your plugin instead?**
 - A: This certain vendor is careful to offer several disclaimers before giving that plugin to you but the most important is that the plugin passes the **plaintext** password in the command line. All anyone has to do is review the Event Logs and discover the password. If you have an EDR/SIEM that sends your logs off the server the issue gets worse and even more eyes can see this information. Please don't use that plugin.
 
 ![Insecure PowerShell EXE](docs/InSecurePasswordPassing.PNG)
 
--Q: I tried to compile this code on my own because I don't trust your DLL file and get "XYZ" error.
+-**Q: I tried to compile this code on my own because I don't trust your DLL file and get "XYZ" error.**
 - A: See the "support" section above and the "how to compile" section below
 
--Q: I still don't get what this plugin does and how it's different than the CyberArk Marketplace?
-- A: Imagine you want to build a plugin to change a password in a SaaS solution (or anything else really). It has a REST API to allow that automated password change but there is no existing integration within the CyberArk Marketplace. You have 2 choices: A) pay the vendor of your choosing high dollars to make it for you along with the hassle of back/forth paperwork B) create the plugin yourself. Assuming you go with option B you then have 2 more options: A) use CyberArk [Prompts/Process Files](https://docs.cyberark.com/pam-self-hosted/latest/en/content/pasimp/plug-in-terminal-plugin-controller.htm) method B) use [CyberArk .NET SDK](https://docs.cyberark.com/pam-self-hosted/latest/en/content/pasimp/plug-in-netinvoker.htm?tocpath=Developer%7CCreate%20extensions%7CCreate%20CPM%20plugins%7CCredentials%20Management%20.NET%20SDK%7C_____0). (The WebFramework option does not apply here because it only works for human GUIs and not REST APIs). Option A is insanely difficult to work with REST APIs but I've heard it can be done. Option B is more possible yet C# is a complex language and most people just don't have the background/skillset to do it. This code essentially removes the need to know/use C# code and allows you to simply specify the PowerShell script YOU wrote and use that script instead for all the logic/workflow of your plugin. In other words, write your plugin in PowerShell rather than another more complicated languages!
+-**Q: I still don't get what this plugin does and how it's different than the CyberArk Marketplace?**
+- A: Imagine you want a plugin to change a password in a SaaS solution (or anything else really). The remote software package has a REST API to allow that automated password change but there is no existing integration within the CyberArk Marketplace. You have 2 choices: A) pay the vendor of your choosing high dollars to make it for you along with the hassle of back/forth paperwork B) create the plugin yourself. Assuming you go with option B you then have 2 more options: A) use CyberArk [Prompts/Process Files](https://docs.cyberark.com/pam-self-hosted/latest/en/content/pasimp/plug-in-terminal-plugin-controller.htm) method B) use [CyberArk .NET SDK](https://docs.cyberark.com/pam-self-hosted/latest/en/content/pasimp/plug-in-netinvoker.htm?tocpath=Developer%7CCreate%20extensions%7CCreate%20CPM%20plugins%7CCredentials%20Management%20.NET%20SDK%7C_____0). (The WebFramework option does not apply here because it only works for human GUIs and not REST APIs). Option A is insanely difficult to work with REST APIs but I've heard it can be done. Option B is more possible yet C# is a complex language and most people just don't have the background/skillset to do it. My code essentially removes the need to know/use C# code and allows you to simply specify the PowerShell script YOU wrote for all the logic/workflow of your plugin. In other words, write your plugin in PowerShell rather than another more complicated languages!
 
--Q: You mentioned that this plugin can be used for both Targets and Usages (Service). So doesn't that mean this one plugin could be used Universally? 
+-**Q: So do I actually change/edit any of this repo's code or customize it?**
+- A: Ideally, **no** (emphasis on the term "universal") action/changes are required from you. I built this plugin to be highly versital and read in all the account/platform properties in <i>most</i> cases. There a few advanced cases where you would want to modify this code though I would hope those are rare. Some rare scenerious would include: better "validation" of required vs. optional fields that get populated in PVWA; forcing fields to exist or validate, especially those needing "File Categories" created; and if you for some reason to the "logon" and "preconcile" functions of the plugin to actually do something different than automatic success. **The only change you should make is that once you import the platform you should edit the "PowerShellScriptName" (located in the 'bin' folder of CPM) in the platform to point to the PowerShell script you wrote.**
+
+-**Q: You mentioned that this plugin can be used for both Targets and Usages (Service). So doesn't that mean this one plugin could be used Universally?** 
 - A: Yes! That's the idea and why the name of this plugin is Universal. You import the platform and then you add a unique PowerShell script for each type of integration. In other words, the only thing that changes is the script name you populate in the platform (on optionally on the Account itself if you create a File Category for it). The end result is that you'll have <i>many</i> PowerShell scripts for each type of integration yet only this **one** single plugin spanning all of them.
 
--Q: I <i>think</i> I get how cool this really is now, so how do I use it? 
+-**Q: I <i>think</i> I get how cool this really is now, so how do I use it?**
 - A: You have two options: 
     A) <i>recommended</i> - check out the release section of this GitHub repo and download the ZIP file to import the platform
     B) <i>not recommended unless you really know what you're doing</i> - download just the DLL plugin itself from the release portion, manually copy to your CPM bin folder, and edit existing platforms of yours to point to it. You'll also need to add the missing parameters in to it
 
 
--Q: You want me to just "trust you" in this day and age before I download that DLL from your release page? How about you tell me how to compile the code myself so I 
-can customize it or at least know the code I'm compiling is generating the DLL I want? 
+-**Q: You want me to just "trust you" in this day and age before I download that DLL from your release page? How about you tell me how to compile the code myself so I can customize it or at least know the code I'm compiling is generating the DLL I want?** 
 - A: Can't say I blame you. I also say that, like CyberArk, I put no "questionable code" in my code. There is no "call home" no "metric collection" no "statistic" 
 no "Google Analytics" type things in my code. I couldn't tell, even if I wanted, what company was using my plugin and believe me, that's a legal problem I don't want to have.
 It's also worth mentioning that I like GitHub and don't want to breach their code of conduct. See the compiling section for info on that, though, I can tell you it's 
 obviously way faster to just grab the release and use that.
 
--Q: If I want to compile this C# project myself but don't I need [Visual Studio Professional](https://visualstudio.microsoft.com/vs/professional/) which costs tons of money? 
+-**Q: If I want to compile this C# project myself but don't I need [Visual Studio Professional](https://visualstudio.microsoft.com/vs/professional/) which costs tons of money?**
 - A: While it's a far better experience to edit code and "see" things from a human perspetive, **no**, it's not "required" to simply compile this code. I spent a LOT of time
 researching how to skip needing such an expensive software package. It can be done "free" using a simple command line action - see compiling steps below. 
 
