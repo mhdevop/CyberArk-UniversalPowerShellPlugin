@@ -1,5 +1,5 @@
 ﻿
-namespace CyberArk.Extensions.Plugin.Template
+namespace CyberArk.Extensions.Plugin.RealPowerShell
 {
 
     /*

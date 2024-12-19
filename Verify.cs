@@ -3,18 +3,18 @@ using CyberArk.Extensions.Plugins.Models;
 using CyberArk.Extensions.Utilties.Logger;
 using CyberArk.Extensions.Utilties.Reader;
 using System;
+using System.Collections.ObjectModel;
+using System.Collections;
+using System.Management.Automation.Runspaces;
+using System.Management.Automation;
+using System.Text;
 
 // Change the Template name space
-namespace CyberArk.Extensions.Plugin.Template
+namespace CyberArk.Extensions.Plugin.RealPowerShell
 {
     public class Verify : BaseAction
     {
-        #region Consts
-
-        public static readonly string USERNAME = "username";
-        public static readonly string PORT = "port";
-
-        #endregion
+       
 
         #region constructor
         /// <summary>
@@ -45,55 +45,19 @@ namespace CyberArk.Extensions.Plugin.Template
         /// <param name="platformOutput"></param>
         override public int run(ref PlatformOutput platformOutput)
         {
+
+
+            // CyberArk code to start custom logging and set default Return Code to a value that will show a bad plugin configuration if unchanged
             Logger.MethodStart();
-
-            #region Init
-
             int RC = 9999;
 
-            #endregion 
 
             try
             {
-
-                #region Fetch Account Properties (FileCategories)
-
-                // Example: Fetch mandatory parameter - Username.
-                // A mandatory parameter is a parameter that must be defined in the account.
-                // TargetAccount.AccountProp is a dictionary that provides access to all the file categories of the target account.
-                // An exception will be thrown if the parameter does not exist in the account.
-                string username = ParametersAPI.GetMandatoryParameter(USERNAME, TargetAccount.AccountProp);
-
-                // Example: Fetch optional parmetere - Port.
-                // An optional parameter is a parameter that can be defined in the account or in the platform.
-                // TargetAccount.ExtraInfoProp is a dictionary that provieds access to all the platform parameters of the target account.
-                // An exception will be thrown if the parameter does not exist in neither the account or the platform.
-                string strPort = ParametersAPI.GetOptionalParameter(PORT, TargetAccount.AccountProp, TargetAccount.ExtraInfoProp);
-
-                // Note: To fetch Logon, Reconcile, Master or Usage account properties,
-                // replace the TargetAccount object with the relevant account's object.
-
-                #endregion
-
-                #region Fetch Account's Passwords
-
-                // Example : Fetch the target account's password.
-                string targetAccountPassword = TargetAccount.CurrentPassword.convertSecureStringToString();
-
-                // Example : Fetch the target account's new password.
-                string targetAccountNewPassword = TargetAccount.NewPassword.convertSecureStringToString();
-
-                #endregion
-
-                #region Logic
-                /////////////// Put your code here ////////////////////////////
-                // Logic goes here!!
-                // Logic goes here!!
-                // Logic goes here!!
-                // Logic goes here!!
-                // Logic goes here!!
-                /////////////// Put your code here ////////////////////////////
-                #endregion Logic
+                // Run our shared base action code. It's the same code no matter the CPM action being taken as we abstract
+                // all the "logic" to PowerShell and not here in C#
+                log.WriteLine("verify", "customCode", "Attempting new function", LogLevel.INFO);
+                RC = UniversalPowershellPlugin("verify", platformOutput);
 
             }
             catch (Exception ex)

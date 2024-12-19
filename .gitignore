@@ -363,10 +363,8 @@ MigrationBackup/
 FodyWeavers.xsd
 <<<<<<< HEAD
 
-#don't include DLL files due to potential distro concerns
-CPMbin/
-
 #don't include binary
 bin/
+
 =======
 >>>>>>> eabf1b2 (changed file structure)
