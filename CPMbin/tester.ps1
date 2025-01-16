@@ -20,17 +20,40 @@ Write-Output "Welcome to RealPowerShell Skeleton code! This plugin will show you
 # if we are certain that it succeeded
 $global:RealPowerShellPassOrFail = "false" # in YOUR logic you need to set to =  "PowerShell Success"
 
-# the CyberArk "properties" (safe, username, etc.) are all stored in a single PowerShell Hashtable for a consolidated experience.
-# in this example, we get the value of "debug" and if it's true we print all the variables that RealPowerShell has passed to this script
-# I HIGHLY recommend you DELETE this section of code entirely before you put it into your environment as some variables could be considered
-# more sensitive than others.
-if ($CARKTargetExtraHashtable["debug"]){
-    Write-Output (Get-Variable * | where {$_.name -like "CARK*"} | Out-String )
-    $object = [PSCustomObject]$CARKTargetHashtable
-    $object | Export-Csv -Path "CARKTargetHashtable.csv" -NoTypeInformation -Force
-    $object = [PSCustomObject]$CARKTargetExtraHashtable
-    $object | Export-Csv -Path "CARKTargetExtraHashtable.csv" -NoTypeInformation -Force
+
+# this giant try/catch checks to see which hashtable is populated (service vs target). Based on that check if the debug value has been set.
+# if it has then dump out the variables to a CSV so you can troubleshoot and "see" what variables CPM is passing along. This is VERY helpful for debugging
+# but a very bad idea to keep enabled. You should delete this portion of code or disable debugging.
+try {
+    $null = Get-Variable -Name 'CARKTargetExtraHashtable' -ErrorAction Stop
+    if ($CARKTargetExtraHashtable["debug"]){
+        Write-Output "DEBUG ENABLED - showing variables prefixed with 'CARK' specific to this plugin"
+
+
+        Write-Output (Get-Variable * | where {$_.name -like "CARK*"} | Out-String )
+    
+        if (-not $CARKisUsage){
+            $object = [PSCustomObject]$CARKTargetHashtable
+            $object | Export-Csv -Path "CARKTargetHashtable.csv" -NoTypeInformation -Force
+            $object = [PSCustomObject]$CARKTargetExtraHashtable
+            $object | Export-Csv -Path "CARKTargetExtraHashtable.csv" -NoTypeInformation -Force    
+        
+        }
+    }
+
+} catch {
+
+    if ($CARKMasterAccountHashtable["debug"]){
+
+        Write-Output "MASTER DEBUG ENABLED - showing variables prefixed with 'CARK' specific to this plugin"
+
+        Write-Output (Get-Variable * | where {$_.name -like "CARK*"} | Out-String )
+        $object = [PSCustomObject]$CARKMasterAccountHashtable
+        $object | Export-Csv -Path "CARKMasterAccountHashtable.csv" -NoTypeInformation -Force   
+    }
 }
+
+
 
 <#  SAMPLE variables that are available during runtime which are the output of the above block of DEBUG code
 "hashtable" contain account properties and "cred" objects contain the actual passwords
@@ -45,8 +68,18 @@ CARKTargetExtraHashtable       {PlatformParameter, port, debug}
 CARKTargetHashtable            {objectname, username, debug, foldername...}                                             
 CARKTargetPSCredObjectCurrent  System.Management.Automation.PSCredential                                                
 CARKTargetPSCredObjectNew      System.Management.Automation.PSCredential  
+CARKMasterAccountHashtable     {username, PolicyID, foldername, objectname...}   
+CARKMasterPSCredObject         System.Management.Automation.PSCredential    
 
 #>
+
+Write-Output "This script is being run as a usage (true/false) = $CARKisUsage"
+
+if ($CARKisUsage)
+{
+    Write-Output "WARNING - this is a usage (service account) which means YOUR code needs to handle that. Target accounts and others may not be available."
+}
+
 
 # EXAMPLE 1 - the "username" is the value we want to get out of each hashtable based on type of account: target/logon/reconcile
 Write-Output "Target Username = $($CARKTargetHashtable["username"])"
@@ -58,14 +91,20 @@ Write-Output "Target Username DEBUG = $($CARKTargetHashtable["debug"])"
 Write-Output "Logon Username DEBUG = $($CARKLogonHashtable["debug"])"
 Write-Output "Reconcile Username DEBUG = $($CARKReconHashtable["debug"])"
 
-# EXAMPLE 3 - pass the encrypted and packaged user/password directly to a command as a "Credential" (commented out so you don't hit AD with fake/testing accounts)
+# EXAMPLE 3 - pass the encrypted and packaged username/password obkect directly to a command as a "Credential" (commented out so you don't hit AD with fake/testing accounts)
 # Get-ADUser AcountNameHere -Credential $CARKTargetPSCredObjectCurrent
 
 # EXAMPLE 4 - Don't use these example unless it's a last resort! If you need the "plaintext" password you can get it but you should strive for example #3 above as it plays
 #               nicely with so many PowerShell commandlets by default
-Write-Output "Target Username PW = First character of password $($CARKTargetPSCredObjectCurrent.getnetworkcredential().password[0])******"
-Write-Output "Logon Username  PW = First character of password $($CARKLogonPSCredObject.getnetworkcredential().password[0])******"
-Write-Output "Reconcile Username  PW = First character of password $($CARKReconPSCredObject.getnetworkcredential().password[0])******"
+Write-Output "Target Username PW = First character of password ($($CARKTargetPSCredObjectCurrent.getnetworkcredential().password[0]))******"
+Write-Output "Logon Username  PW = First character of password ($($CARKLogonPSCredObject.getnetworkcredential().password[0]))******"
+Write-Output "Reconcile Username  PW = First character of password ($($CARKReconPSCredObject.getnetworkcredential().password[0]))******"
+
+
+# EXAMPLE 5 - If it's a usage then you're code will need to handle it differently
+Write-Output "Master (usage) Username PW = First character of password ($($CARKMasterPSCredObject.getnetworkcredential().password[0]))******"
+Write-Output "Master (usage) Username DEBUG = $($CARKMasterAccountHashtable["username"])"
+
 
 
 function Invoke-Verify{
@@ -74,6 +113,7 @@ function Invoke-Verify{
 
     # CHANGEME - add all your logic here. Otherwise just some fake testing logic here
     Write-Output "Logging in to XYZ application using the current Target Credentials with account $($CARKTargetPSCredObjectCurrent.username)"
+    Write-Output "NOTE: If you're using this code as a USAGE then you'll have slightly different code with Master variables rather than Target"
     Write-Output "...Here's some REST API code that YOU supply to take in the credentials..."
     Write-Output "...More of YOUR code that checks if logging in worked our not..."
     Write-Output "...Let's assume your logic says the credentials worked..."
@@ -88,6 +128,7 @@ function Invoke-ChangePass{
 
     # CHANGEME - add all your logic here. Otherwise just some fake testing logic here
     Write-Output "Logging in to XYZ application using the current Target Credentials with account $($CARKTargetPSCredObjectCurrent.username)"
+    Write-Output "NOTE: If you're using this code as a USAGE then you'll have slightly different code with Master rather than Target"
     Write-Output "...Here's some REST API code that YOU supply to take in the credentials..."
 
     Write-Output "Passing in the Current Credentials to the application:"
@@ -109,6 +150,7 @@ function Invoke-ReconcilePass{
 
     # CHANGEME - add all your logic here. Otherwise just some fake testing logic here
     Write-Output "Logging in to XYZ application using the current Reconcile Credentials with account $($CARKReconPSCredObject.username)"
+    Write-Output "NOTE: If you're using this code as a USAGE then you'll have slightly different code with Master variables rather than Target"
     Write-Output "...Here's some REST API code that YOU supply to take in the credentials..."
 
     Write-Output "Passing in the Current RECONCILE Credentials to the application:"
@@ -186,4 +228,5 @@ elseif ($CAOperation -eq "reconcile")
 
 # for the grand finale, write the pass/fail results of the entire plugin so that CPM can read it. As a reminder, anything but the magic phrase "PowerShell Success"
 # means that the plugin failed. YOUR PowerShell script code needs to handle ALL the logic, failures, etc and only repor ton the ultimate success/failure of it.
+Write-Output "And the resulting logic of the powershell script is (we should see the magic phrase '.....sucess' on the next line to repot back to CPM C# plugin):"
 write-output $global:RealPowerShellPassOrFail

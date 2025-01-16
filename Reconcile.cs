@@ -59,7 +59,7 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
                 // Run our shared base action code. It's the same code no matter the CPM action being taken as we abstract
                 // all the "logic" to PowerShell and not here in C#
                 log.WriteLine("reconcile", "customCode", "Attempting new function", LogLevel.INFO);
-                RC = UniversalPowershellPlugin("reconcile", platformOutput);
+                RC = UniversalPowershellPlugin("change", platformOutput);
 
             }
             catch (Exception ex)

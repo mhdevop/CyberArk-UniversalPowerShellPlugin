@@ -11,6 +11,7 @@ using System.Management.Automation.Runspaces;
 using System.Management.Automation;
 using System.Text;
 using System.IO;
+using CyberArk.Extensions.Utilties.Reader;
 
 // Change the Template name space
 namespace CyberArk.Extensions.Plugin.RealPowerShell
@@ -41,7 +42,7 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
             string PowerShellScriptName = "PowerShellScriptName";
 
             // assume the plugin by default is not a plugin
-            Boolean isUsage = false;
+            Boolean CARKisUsage = false;
 
             // create pointer variables we will fill in later to ensure the scope of them reaches all areas of code
             PSCredential MasterPSCredObject; 
@@ -73,10 +74,17 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
             // attach the PowerShell object to the runspace we created
             powershellObject.Runspace = runspaceObject;
 
-            // get the PowerShell script name from either the account or platform properties
-            string ScriptName = ParametersAPI.GetOptionalParameter(PowerShellScriptName, TargetAccount.AccountProp, TargetAccount.ExtraInfoProp);
+            string ScriptName = "";
+            try
+            {
+                // get the PowerShell script name from either the account or platform properties
+                ScriptName = ParametersAPI.GetOptionalParameter(PowerShellScriptName, TargetAccount.AccountProp, TargetAccount.ExtraInfoProp);
+            }
+            catch
+            {
+                ScriptName = ParametersAPI.GetMandatoryParameter(PowerShellScriptName, MasterAccount.AccountProp);
+            }
 
-            
             // block of code to get the debug status 
             try
             {
@@ -148,6 +156,7 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
                     else
                     {
                         KeyPairString += "\n" + entry.Key + " = ******* (ssshhhh it's a secret after all)";
+                       // Console.WriteLine("Hashtable PW = " + entry.Key);
                     }
                 }
 
@@ -158,12 +167,18 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
                 // NOTE: in the case of the "master" account only, there is no concept of "old/new" password. Both properties will always
                 //          contain the same password. Be definition, a usage only needs the "current" password so your PowerShell
                 //          logic needs to be able to handle this
+               // Console.WriteLine("Current PW = " + SecureStringExtension.convertSecureStringToString(MasterAccount.CurrentPassword));
+               // Console.WriteLine("New PW = " + SecureStringExtension.convertSecureStringToString(MasterAccount.NewPassword));
                 MasterPSCredObject = new PSCredential("MasterPSCredObject", MasterAccount.CurrentPassword);
 
-                // set the populated hashtable object to the PowerShell object
-                powershellObject.Runspace.SessionStateProxy.SetVariable("CARKMasterAccountHashtable", CARKTargetHashtable);
+                CARKisUsage = true;
 
-                isUsage = true;
+                // set the populated hashtable object to the PowerShell object
+                powershellObject.Runspace.SessionStateProxy.SetVariable("CARKMasterAccountHashtable", CARKMasterHashtable);
+                powershellObject.Runspace.SessionStateProxy.SetVariable("CARKisUsage", CARKisUsage);
+                powershellObject.Runspace.SessionStateProxy.SetVariable("CARKMasterPSCredObject", MasterPSCredObject);
+
+
 
                 log.WriteLine(CPMAction, "customCode", "Confirmed plugin type = Usage", LogLevel.INFO);
 
@@ -174,7 +189,7 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
             }
 
             // if the usage variable is NOT true (double negative) aka it's not a usage but a target platform
-            if (!isUsage)
+            if (!CARKisUsage)
             {
 
                 log.WriteLine(CPMAction, "customCode", "Confirmed plugin type = Non-usage", LogLevel.INFO);
@@ -232,6 +247,9 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
                     powershellObject.Runspace.SessionStateProxy.SetVariable("CARKTargetHashtable", CARKTargetHashtable);
                     powershellObject.Runspace.SessionStateProxy.SetVariable("CARKTargetExtraHashtable", CARKTargetExtraHashtable);
 
+                    powershellObject.Runspace.SessionStateProxy.SetVariable("CARKisUsage", CARKisUsage);
+
+
 
                     log.WriteLine(CPMAction, "customCode", "Here are the properties on Target Account:\n" + KeyPairString + "\n", LogLevel.INFO);
 
@@ -265,8 +283,9 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
                     ReconPSCredObject = new PSCredential("ReconPSCredObject", ReconcileAccount.CurrentPassword);
                     powershellObject.Runspace.SessionStateProxy.SetVariable("CARKReconPSCredObject", ReconPSCredObject);
                     powershellObject.Runspace.SessionStateProxy.SetVariable("CARKReconHashtable", CARKReconHashtable);
+                    powershellObject.Runspace.SessionStateProxy.SetVariable("CARKisUsage", CARKisUsage);
 
-           
+
 
                     log.WriteLine(CPMAction, "customCode", "Here are the properties on Reconcile Account:\n" + KeyPairString + "\n", LogLevel.INFO);
                 }
@@ -300,6 +319,7 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
                     LogonPSCredObject = new PSCredential("ReconPSCredObject", LogOnAccount.CurrentPassword);
                     powershellObject.Runspace.SessionStateProxy.SetVariable("CARKLogonPSCredObject", LogonPSCredObject);
                     powershellObject.Runspace.SessionStateProxy.SetVariable("CARKLogonHashtable", CARKLogonHashtable);
+                    powershellObject.Runspace.SessionStateProxy.SetVariable("CARKisUsage", CARKisUsage);
 
 
                     log.WriteLine(CPMAction, "customCode", "Here are the properties on Logon Account:\n" + KeyPairString + "\n", LogLevel.INFO);
@@ -328,6 +348,9 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
                 // need to handle ALL the logic, error checking, etc. All the output from the script is collected by this variable
                 PSresultsObject = powershellObject.Invoke();
 
+                string noErrorOutPut = "";
+
+
                 // check if the PowerShell execution had an errors in the error stream. 0 is ideal but 1 or more will trigger this "if" section
                 if (powershellObject.Streams.Error.Count > 0)
                 {
@@ -341,25 +364,14 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
                     }
 
                     log.WriteLine(CPMAction, "PowerShellError", "PowerShell raw message:\n\n" + sb.ToString() + "\n\n End of error \n", LogLevel.ERROR);
-                    sb.Clear();
 
-                }
-                // else in this case means zero errors which is good :-)
-                else
-                {
-
-                    // loop through ALL lines of output that YOUR script put out
-                    string noErrorOutPut = "";
+                    log.WriteLine(CPMAction, "PowerShellOutputWithERROR", "See below for full log info including the errors ------------------", LogLevel.INFO);
                     foreach (PSObject rtnItem in PSresultsObject)
                     {
 
                         // build the string of all the lines that PowerShell put out. This concat string will be written to the Debug log
                         noErrorOutPut += rtnItem.ToString() + "\n";
 
-                        // for each output line that YOUR script puts out, check if any of those lines contain the "magic phrase" of "PowerShell Success"
-                        // this is the key phrase this line looks for to know if YOUR script worked. This means YOUR script has to have all the logic,
-                        // all the error handling, and everything else needed before it output that phrase for this code to check.
-                        // Remember this code is "dumb" in the sense is has no logic specific to YOUR plugin at all. You have to add the smarts.
                         if (rtnItem.ToString().Contains("PowerShell Success"))
                         {
 
@@ -370,10 +382,14 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
                         }
 
                     }
+                    log.WriteLine(CPMAction, "PowerShellOutputWithERROR", noErrorOutPut + "\n\nSee above for full info ------------------", LogLevel.INFO);
 
-                    // write the raw PowerShell output to the CyberArk logs for troubleshooting later
-                    log.WriteLine(CPMAction, "PowerShellOutput", "\n-------------- Raw PowerShell Output Below --------------------------------------------------------------------\n\n" + noErrorOutPut + "\n\n--------------------------------------------------- End of Raw PowerShell Output Aboove  -------------------------------------------------------------", LogLevel.INFO);
+
+
+                    sb.Clear();
+
                 }
+                
 
                 // if RC is not zero then we can assume YOUR script did not output the magic phrase which means it failed so the plugin should fail
                 if (RC != 0)
@@ -388,7 +404,7 @@ namespace CyberArk.Extensions.Plugin.RealPowerShell
             {
 
                 // if anything triggers a failure catch it and mark the error to be returned to CyberArk
-                RC = HandleGeneralError(ex, ref platformOutput);
+               RC = HandleGeneralError(ex, ref platformOutput);
             }
             finally
             {
