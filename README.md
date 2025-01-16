@@ -1,6 +1,6 @@
 
 # CyberArk-UniversalPowerShellPlugin
-## <i>A plugin to make creating plugins just a little easier</i>
+## <i>A universal CyberArk plugin to make creating CPM plugins a lot easier</i>
 
 **CyberArk-UniversalPowerShellPlugin** is a prepopulated template of the   [CyberArk .NET SDK](https://docs.cyberark.com/pam-self-hosted/latest/en/content/pasimp/plug-in-netinvoker.htm?tocpath=Developer%7CCreate%20extensions%7CCreate%20CPM%20plugins%7CCredentials%20Management%20.NET%20SDK%7C_____0) that abstracts complicated code like C# and [Prompts/Process Files](https://docs.cyberark.com/pam-self-hosted/latest/en/content/pasimp/plug-in-terminal-plugin-controller.htm) down to simple PowerShell code! In other words, **you can write 99% (or more) of your code in PowerShell <u>without</u> ever needing to touch or know those other complicated languages.** Many CyberArk folk don't have the time to learn other languages and often PowerShell is already utilized (BIG shout out to [psPAS](https://github.com/pspete/psPAS)). Here are the highlighted features of this plugin:
 
@@ -19,7 +19,7 @@ These days you can't be too careful so "for the record" note the following:
 - **All plugins that YOU make are in a 100% NON-supported state from CyberArk** (and rightfully so). **In other words, "you code it you own it" so don't expect CyberArk to troubleshoot it** (This is a major Pro for paying CyberArk or other vendors to write plugins if cost is no concern)
 - While I have tested this code myself, YOU are solely responsible for it being used for your purposes. I take zero responsibility for any and all issues caused by its consumption.
 - I cannot and will not provide "official support" for this plugin. Anyone in the CyberArk business knows that CyberArk consultants at minimum make ~$250+ per hour so as much as I'd love to support it, it's unrealistic for me to do so
-- I built this code during my own personal time (not work hours), using my own personal PC (not work), my own personal paid Visual Studio Pro license from my own bank account, and my own collected thoughts (intelletual property) 
+- I built this code during my own personal time (not work hours), using my own personal PC (not work), my own personal paid Visual Studio Pro license (from my own bank account), and my own collected thoughts (intelletual property) 
 - Regarding the code itself:
   - My code does not follow some best practices to which I admit directly and openly. My objective was not to win first prize on "C# Best Practices 101".
   - My primary object was to make code that "works" and is "easier to understand" rather than "efficiency" or "minimal resources". (eg there is plenty of redundancy and room for fancy things like abstract classes, sharing methods, etc. but I chose not to use those to try and keep the code linear and easier to understand for the masses)
@@ -92,9 +92,13 @@ These are the steps that I've personally tested and got working though the steps
 9. Double and triple verify that the contents of your "CPMbin" folder have the exact same file names:
 ![CPMbin contents](docs/CPMbinContents.PNG)
 10. Now for the moment of truth! In a command prompt window (not PowerShell), enter the commands (subbing the PATH for the exact location you put this GitHub code folder):
+
 `cd /D "C:\THE\FULL\PATH\TO\CA-RealPowerShell"`
+
 then command (assuming you've already installed [.NET 4.8 developer pack](https://go.microsoft.com/fwlink/?linkid=2088517) )
+
 `dotnet build --configuration Release`
+
 11. Assuming your environment is setup correctly, you've followed these steps correctly, and the compiling stars in the sky are aligned you should see success:
 ![Build Success](docs/BuildSuccess.PNG)
 12. Navigate within the project folder to see the finished plugin to get "CyberArk.Extensions.Plugin.RealPowerShell.dll"  (......\CA-RealPowerShell\bin\x86\Release):
@@ -108,9 +112,13 @@ here's how you would test it which heavily leverages [CyberArk's Official Docume
 
 1. Complete steps #1 - 9 from the "build" steps in this guide to ensure your "CPMBin" folder has this plugin + **all** the required CyberArk files in it
 2. Run the following Command Prompt (not PowerShell) commands (subbing the PATH for the exact location you put this GitHub code folder):
+
 `cd /D "C:\THE\FULL\PATH\TO\CA-RealPowerShell\CPMBin"`
-then this command (you can replace "changepass" with the other values the [CyberArk commands documentation](https://docs.cyberark.com/pam-self-hosted/latest/en/content/pasimp/plug-in-netinvoker_test.htm#Runcommand) specifies)
+
+then this command (you can replace "changepass" with the other values the [CyberArk commands documentation](https://docs.cyberark.com/pam-self-hosted/latest/en/content/pasimp/plug-in-netinvoker_test.htm#Runcommand) specifies. You can also change "user.ini" to "masteruser.ini" to simulate a [Usage "Service"](https://docs.cyberark.com/pam-self-hosted/latest/en/content/landing%20pages/lpserviceplugins.htm))
+
 `CANetPluginInvoker.exe ..\user.ini changepass CyberArk.Extensions.Plugin.RealPowerShell.dll true`
+
 3. Assuming you have made no changes to the Project structure or files, you'll see this test output:
 ![Plugin Test](docs/PluginTest.PNG)
 4. You can now edit the PowerShell "tester.ps1" script to actually begin replacing it with your own logic. I HIGHLY recommend you familiarize yourself with this sample
